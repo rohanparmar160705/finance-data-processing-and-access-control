@@ -1,14 +1,22 @@
 const pool = require('../config/db');
 
 // get all users and their assigned roles 
-const getAllUsers = async () => {
-  const result = await pool.query(`
+// get all users and their assigned roles with pagination 
+const getAllUsers = async (limit = 10, offset = 0) => {
+  const dataRes = await pool.query(`
     SELECT u.id, u.name, u.email, u.status, r.name as role
     FROM users u
     LEFT JOIN roles r ON u.role_id = r.id
     ORDER BY u.created_at DESC
-  `);
-  return result.rows;
+    LIMIT $1 OFFSET $2
+  `, [limit, offset]);
+  
+  const countRes = await pool.query('SELECT COUNT(*) FROM users');
+  
+  return {
+    users: dataRes.rows,
+    total: parseInt(countRes.rows[0].count),
+  };
 };
 
 // get profile plus permissions for a specific user 

@@ -11,8 +11,8 @@ const createRecord = async (userId, { amount, type, category, record_date, notes
   return result.rows[0];
 };
 
-// get all records with optional filtering (type, category, date)
-const getRecords = async ({ type, category, startDate, endDate }) => {
+// get all records with optional filtering (type, category, date) and pagination 
+const getRecords = async ({ type, category, startDate, endDate, limit = 10, offset = 0 }) => {
   const fields = ['is_deleted = FALSE'];
   const values = [];
   let idx = 1;
@@ -34,14 +34,27 @@ const getRecords = async ({ type, category, startDate, endDate }) => {
     values.push(endDate);
   }
 
-  const query = `
+  // query for the actual data with limit and offset 
+  const dataQuery = `
     SELECT * FROM financial_records
     WHERE ${fields.join(' AND ')}
     ORDER BY record_date DESC, created_at DESC
+    LIMIT $${idx} OFFSET $${idx + 1}
   `;
 
-  const result = await pool.query(query, values);
-  return result.rows;
+  // query for the total count of matching records 
+  const countQuery = `
+    SELECT COUNT(*) FROM financial_records
+    WHERE ${fields.join(' AND ')}
+  `;
+
+  const dataRes = await pool.query(dataQuery, [...values, limit, offset]);
+  const countRes = await pool.query(countQuery, values);
+
+  return {
+    records: dataRes.rows,
+    total: parseInt(countRes.rows[0].count),
+  };
 };
 
 // get a single record by id 

@@ -17,8 +17,23 @@ const createRecord = async (req, res, next) => {
 const listRecords = async (req, res, next) => {
   try {
     const { type, category, startDate, endDate } = req.query;
-    const records = await recordService.getRecords({ type, category, startDate, endDate });
-    res.json({ data: records });
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+    const offset = (page - 1) * limit;
+
+    const { records, total } = await recordService.getRecords({ 
+      type, category, startDate, endDate, limit, offset 
+    });
+
+    res.json({ 
+      data: records,
+      meta: {
+        total,
+        page,
+        limit,
+        totalPages: Math.ceil(total / limit)
+      }
+    });
   } catch (err) {
     next(err);
   }

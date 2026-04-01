@@ -3,8 +3,21 @@ const userService = require('../services/user.service');
 // list all users for admin dashboard 
 const listUsers = async (req, res, next) => {
   try {
-    const users = await userService.getAllUsers();
-    res.json({ data: users });
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+    const offset = (page - 1) * limit;
+
+    const { users, total } = await userService.getAllUsers(limit, offset);
+    
+    res.json({ 
+      data: users,
+      meta: {
+        total,
+        page,
+        limit,
+        totalPages: Math.ceil(total / limit)
+      }
+    });
   } catch (err) {
     next(err);
   }
