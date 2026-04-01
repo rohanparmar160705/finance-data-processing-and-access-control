@@ -9,6 +9,7 @@ const apiLimiter = rateLimit({
   message: {
     message: 'Too many requests from this IP, please try again after 15 minutes',
   },
+  skip: () => process.env.NODE_ENV === 'test',
 });
 
 // stricter limit for auth endpoints like login and register 
@@ -20,6 +21,7 @@ const authLimiter = rateLimit({
   message: {
     message: 'Too many authentication attempts from this IP, please try again after 15 minutes',
   },
+  skip: () => process.env.NODE_ENV === 'test',
 });
 
 module.exports = {
