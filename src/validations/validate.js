@@ -1,3 +1,4 @@
+// middleware to validate request body against a zod schema 
 const validate = (schema) => (req, res, next) => {
   try {
     schema.parse(req.body);

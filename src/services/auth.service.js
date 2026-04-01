@@ -1,13 +1,16 @@
 const pool = require('../config/db');
 const bcrypt = require('bcrypt');
 
+// create a new user and hash their password 
 const createUser = async ({ name, email, password, role_id }) => {
+  // hash password before saving 
   const hashed = await bcrypt.hash(password, 10);
 
   const roleQuery = role_id
     ? 'SELECT id FROM roles WHERE id = $1'
     : "SELECT id FROM roles WHERE name = 'viewer'";
 
+  // get the correct role id 
   const roleRes = await pool.query(roleQuery, role_id ? [role_id] : []);
   const finalRoleId = roleRes.rows[0].id;
 
@@ -21,6 +24,7 @@ const createUser = async ({ name, email, password, role_id }) => {
   return result.rows[0];
 };
 
+// check credentials and return user info 
 const loginUser = async ({ email, password }) => {
   const result = await pool.query(
     `SELECT u.*, r.name as role

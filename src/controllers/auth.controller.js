@@ -1,6 +1,7 @@
 const jwt = require('jsonwebtoken');
 const authService = require('../services/auth.service');
 
+// handle new user registration 
 const register = async (req, res, next) => {
   try {
     const user = await authService.createUser(req.body);
@@ -14,10 +15,12 @@ const register = async (req, res, next) => {
   }
 };
 
+// handle user login and token generation 
 const login = async (req, res, next) => {
   try {
     const user = await authService.loginUser(req.body);
 
+    // sign jwt with user details 
     const token = jwt.sign(
       { id: user.id, role: user.role },
       process.env.JWT_SECRET,
