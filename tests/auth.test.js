@@ -68,5 +68,24 @@ describe('Auth API', () => {
       
       expect(res.statusCode).toEqual(400);
     });
+
+    it('should fail to login if account is deactivated', async () => {
+      const user = getUniqueUser();
+      await request(app).post('/api/auth/register').send(user);
+
+      // deactivate user via SQL 
+      const pool = require('../src/config/db');
+      await pool.query("UPDATE users SET status = 'inactive' WHERE email = $1", [user.email]);
+
+      const res = await request(app)
+        .post('/api/auth/login')
+        .send({
+          email: user.email,
+          password: user.password
+        });
+      
+      expect(res.statusCode).toEqual(403);
+      expect(res.body.message).toMatch(/Account is deactivated/);
+    });
   });
 });

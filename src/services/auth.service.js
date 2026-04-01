@@ -37,6 +37,11 @@ const loginUser = async ({ email, password }) => {
   const user = result.rows[0];
   if (!user) throw { status: 400, message: 'Invalid credentials' };
 
+  // check if user is active 
+  if (user.status !== 'active') {
+    throw { status: 403, message: 'Account is deactivated. Please contact an admin.' };
+  }
+
   const match = await bcrypt.compare(password, user.password_hash);
   if (!match) throw { status: 400, message: 'Invalid credentials' };
 

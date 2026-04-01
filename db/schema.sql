@@ -51,13 +51,14 @@ CREATE TABLE financial_records (
 
 -- INDEXES
 CREATE INDEX idx_users_email ON users(email);
-CREATE INDEX idx_records_date ON financial_records(record_date)
-WHERE is_deleted = FALSE;
+CREATE INDEX idx_records_date ON financial_records(record_date) WHERE is_deleted = FALSE;
+CREATE INDEX idx_records_user ON financial_records(user_id) WHERE is_deleted = FALSE;
+CREATE INDEX idx_records_type_category ON financial_records(type, category) WHERE is_deleted = FALSE;
 
--- SEED ROLES
+-- Default Roles
 INSERT INTO roles (name) VALUES ('admin'), ('analyst'), ('viewer');
 
--- SEED PERMISSIONS
+-- Default Permissions
 INSERT INTO permissions (name) VALUES
 ('CREATE_RECORD'),
 ('VIEW_RECORD'),
